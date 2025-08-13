@@ -1,0 +1,2 @@
+# LAIKA
+Quadruped robot project
