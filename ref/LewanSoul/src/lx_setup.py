@@ -2,7 +2,7 @@ import sys, time
 import serial
 import lewansoul_lx16a
 
-SERIAL_PORT = '/dev/ttyUSB0'
+SERIAL_PORT = 'COM5'
 
 ctrl = lewansoul_lx16a.ServoController(
     serial.Serial(SERIAL_PORT, 115200, timeout=1),
