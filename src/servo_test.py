@@ -2,7 +2,7 @@ import sys, time
 import serial
 import lewansoul_lx16a
 
-SERIAL_PORT = 'COM5'  # change port as necessary
+SERIAL_PORT = 'COM6'  # change port as necessary
 
 ctrl = lewansoul_lx16a.ServoController(
     serial.Serial(SERIAL_PORT, 115200, timeout=1),
@@ -15,12 +15,13 @@ def print_help():
     print("2. move <servo_id> <position> [time] - Move servo to position (0-1000)")
     print("3. ftest - Test front-side servo movement")
     print("4. btest - Test back-side servo movement")
-    print("5. scan - Scan for available servos")
-    print("6. set_temp <servo_id> <limit> - Set temperature limit")
-    print("7. reset <servo_id> - Reset servo settings")
-    print("8. assign <old_id> <new_id> - Change servo ID")
-    print("9. help - Show this help message")
-    print("10. quit - Exit interactive mode")
+    print("5. standtest - Test standing-up and sitting-down movements")
+    print("6. scan - Scan for available servos")
+    print("7. set_temp <servo_id> <limit> - Set temperature limit")
+    print("8. reset <servo_id> - Reset servo settings")
+    print("9. assign <old_id> <new_id> - Change servo ID")
+    print("10. help - Show this help message")
+    print("11. quit - Exit interactive mode")
     print("=" * 45)
 
 """
@@ -64,7 +65,28 @@ if __name__ == "__main__":
                     print("Error: Servo ID must be a number")
                 except Exception as e:
                     print(f"Error getting servo info: {e}")
-                    
+            
+            elif command == 'infoall':
+                print("Info of all detected servo motors...")
+                
+                found_servos = []
+                for i in range(1, 255):
+                    try:
+                        ctrl.get_position(i, 0.03)
+                        found_servos.append(i)
+                    except:
+                        pass
+                        
+                if found_servos:
+                    try:
+                        for servo_id in found_servos:
+                         servo_info(servo_id)
+                         print("")
+                    except Exception as e:
+                        print(f"Error getting servo info: {e}")
+                else:
+                    print("No servos found!")
+            
             elif command == 'move':
                 if len(parts) < 3:
                     print("Usage: move <servo_id> <position> [time_ms]")
@@ -91,14 +113,14 @@ if __name__ == "__main__":
                 try:
                     while True:
                         print(f"Moving servos 2 and 6...")
-                        print("Moving to position 0...")
-                        ctrl.move(2, 0)
-                        ctrl.move(6, 0)
-                        time.sleep(5)
-                        print("Moving to position 1000...")
-                        ctrl.move(2, 0)
-                        ctrl.move(6, 0)
-                        time.sleep(5)
+                        print("Moving to position 500...")
+                        ctrl.move(2, 75, 2000)
+                        ctrl.move(6, 500, 2000)
+                        time.sleep(3)
+                        print("Moving to position 250...")
+                        ctrl.move(2, 300, 2000)
+                        ctrl.move(6, 250, 2000)
+                        time.sleep(3)
                         #print("Moving to center position 500...")
                         #ctrl.move(2, 500, 2000)
                         #ctrl.move(6, 500, 2000)
@@ -131,7 +153,48 @@ if __name__ == "__main__":
                     print("Error: Servo ID must be a number")
                 except Exception as e:
                     print(f"Error testing servo: {e}")
-                            
+            
+            elif command == 'standtest':
+                try:
+                    while True:
+                        ctrl.move(2, 250, 1000)
+                        ctrl.move(6, 250, 1000)
+                        ctrl.move(8, 500, 1000)
+                        ctrl.move(12, 200, 1000)
+                        time.sleep(3)
+                        print("Back to origin...")
+                        ctrl.move(2, 85, 1000)
+                        ctrl.move(6, 400, 1000)
+                        ctrl.move(8, 250, 1000)
+                        ctrl.move(12, 350, 1000)
+                        time.sleep(3)
+                        #print("Moving to center position 500...")
+                        #ctrl.move(2, 500, 2000)
+                        #ctrl.move(6, 500, 2000)
+                        #print("Test completed!")
+                    
+                except ValueError:
+                    print("Error: Servo ID must be a number")
+                except Exception as e:
+                    print(f"Error testing servo: {e}")
+            
+            elif command == 'scan':
+                print("Scanning for servo motors...")
+                found_servos = []
+                for i in range(1, 255):
+                    try:
+                        ctrl.get_position(i, 0.03)
+                        found_servos.append(i)
+                        print(f"Found servo: {i}")
+                    except:
+                        pass
+                        
+                if found_servos:
+                    print(f"\nTotal servos found: {len(found_servos)}")
+                    print(f"Servo IDs: {found_servos}")
+                else:
+                    print("No servos found!")
+            
             elif command == 'scan':
                 print("Scanning for servo motors...")
                 found_servos = []
@@ -149,7 +212,7 @@ if __name__ == "__main__":
                 else:
                     print("No servos found!")
                     
-            elif command == 'set_temp':
+            elif command == 'walk':
                 if len(parts) < 3:
                     print("Usage: set_temp <servo_id> <temperature_limit>")
                     continue

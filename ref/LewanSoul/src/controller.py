@@ -2,7 +2,7 @@ import sys, time, spline
 import serial
 import lewansoul_lx16a
 
-SERIAL_PORT = 'COM5'
+SERIAL_PORT = 'COM4'
 
 controller = lewansoul_lx16a.ServoController(
     serial.Serial(SERIAL_PORT, 115200, timeout=1),
@@ -16,6 +16,7 @@ speed_factor = 0.1
 # Represents a single servo motor used as a joint for a quadruped robot
 class Joint:
     def __init__(self, id):
+        
         self.id = id
         self.prev_pos = -1
         try:
